@@ -1,17 +1,11 @@
 # -*- coding: utf-8 -*-
 import time
-from GB2 import GB2
+from GB import GB
 
 def create_data_model():
     """Stores the data for the problem."""
     data = {}
     data['period'] = 3
-    # data['time_window'] = [
-    #     [[6, 6, 0], [6, 6, 0], [12, 12, 0]],
-    #     [[12, 12, 0], [12, 12, 0], [12, 12, 0]],
-    #     [[0, 7, 7], [0, 7, 7], [0, 12, 12]],
-    #     [[0, 12, 12], [0, 12, 12], [0, 12, 12]]
-    # ]
     data['time_window'] = [
         [[6, 6, 0], [6, 6, 0], [12, 12, 0]],
         [[12, 12, 0], [0, 12, 12], [0, 12, 12]],
@@ -21,13 +15,8 @@ def create_data_model():
     ]
     data['eta'] = 5
     data['lambda'] = [[1, 1, 0], [0, 1, 1]]
-    # data['lambda'] = [[1]]
     data['technician'] = [300, 325, 350]
     data['base'] = {}
-    # data['base']['technician'] = [
-    #     [[6, 6, 6], [6, 6, 6], [6, 6, 6]],
-    #     [[6, 6, 6], [6, 6, 6], [6, 6, 6]]
-    # ]
     data['base']['technician'] = [
         [[12,12,12], [12,12,12], [12,12,12]],
         [[12,12,12], [12,12,12], [12,12,12]]
@@ -70,11 +59,8 @@ def create_data_model():
         [[1,1,1], [1,1,1], [1,1,1], [1,1,1], [1,1,1], [1,1,1], [1,1,1], [1,1,1]]
     ]
     data['vessel'] = {}
-    # tonnes
-    # data['vessel']['capacity'] = [1.5, 26, 2, 15]
-    # data['vessel']['capacity'] = [12, 26, 26, 20, 15]
-    data['vessel']['capacity'] = [20, 26, 20, 26, 26]
-    data['vessel']['capacity'] = [i * 1000 for i in data['vessel']['capacity']]
+    data['vessel']['capacity'] = [20, 26, 20, 26, 26] # tonnes
+    data['vessel']['capacity'] = [i * 1000 for i in data['vessel']['capacity']] # kg
     data['vessel']['to_turbine'] = [
         [[1, 1, 1, 1, 1, 1, 1, 1], [1, 1, 1, 1, 1, 1, 1, 1], [1, 1, 1, 1, 1, 1, 1, 1]],
         [[1, 1, 1, 1, 1, 1, 1, 1], [1, 1, 1, 1, 1, 1, 1, 1], [1, 1, 1, 1, 1, 1, 1, 1]],
@@ -82,10 +68,7 @@ def create_data_model():
         [[1, 1, 1, 1, 1, 1, 1, 1], [1, 1, 1, 1, 1, 1, 1, 1], [1, 1, 1, 1, 1, 1, 1, 1]]
     ]
     data['vessel']['technician'] = [12, 12, 12, 12, 12]
-    # data['vessel']['cost'] = [225, 300, 250, 280]
     data['vessel']['cost'] = [280, 300, 270, 300 ,290]
-    # speed (/knots) randomly generated
-    # data['vessel']['speed'] = [25, 17, 23, 19]
     data['vessel']['speed'] = [20, 17, 22, 18, 17]
     # knots to km/h
     data['vessel']['speed'] = [i * 1.852 for i in data['vessel']['speed']]
@@ -102,13 +85,8 @@ def create_data_model():
 
 def main():
     data = create_data_model()
-    # T1 = time.perf_counter()
     opt_GB = GB2(data)
-    # opt_GB.createDistanceMatrix()
     opt_GB.Solver()
-    # [cost, routes] = opt_GB.Solver()
-    # T2 = time.perf_counter()
-    # print ('time: ', round(T2-T1, 2))
 
 
 if __name__ == "__main__":
