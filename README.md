@@ -20,7 +20,7 @@ GB: an optimization model for routing & scheduling, 3-7 days, multi bases & mult
 v = vessels, d = days, f = wind farms, p = type of technician, J = set of turbines
 
 decision variables:  
-- $y_{v,d,f,i,j}$ binary variable
+- $$y_{v,d,f,i,j}$$ binary variable
 - $t_{v,d,f,i}$ continous variable
 - $q_{v,d,f,p,i}$ integer variable
 - $x_{f,i}$: integer variable, the number of delayed days for maintenance task on turbine i in wind farm f
