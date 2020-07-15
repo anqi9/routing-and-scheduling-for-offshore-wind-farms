@@ -5,6 +5,7 @@ Optimization of Maintenance Routing and Scheduling Problem for offshore wind far
 ---
 A solution to the routing&scheduling problem using Dantzig-Wolfe Decomposition. Implementation with python and SCIP.
 The algorithm based on the paper: Optimisation of maintenance routing and scheduling for offshore wind farms[^1]. 
+
 [^1]: Irawan, Chandra Ade, Djamila Ouelhadj, Dylan Jones, Magnus Stålhane and Iver Bakken Sperstad. “Optimisation of maintenance routing and scheduling for offshore wind farms.” Eur. J. Oper. Res. 256 (2017): 76-89.
 
 Dependencies
