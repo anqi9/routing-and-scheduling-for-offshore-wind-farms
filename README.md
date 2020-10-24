@@ -17,6 +17,7 @@ Dependencies
 Files:
 ---
 - DataGB: data for the problem
+- MasterProblem: the algorithm described in the paper.
 - GB: an optimization model for routing & scheduling, 3-7 days, multi bases & multi wind farms
-- main: main file for running GB.py
+- main: to GB.py and MsterProblem.py
 
