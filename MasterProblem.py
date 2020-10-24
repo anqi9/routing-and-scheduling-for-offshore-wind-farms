@@ -1,5 +1,4 @@
 # -*- coding: utf-8 -*-
-
 import numpy as np
 from sys import exit
 from gurobipy import Model, GRB, quicksum
@@ -10,9 +9,9 @@ class MasterProblem():
     def __init__(self, data):
         self.period = data['period']  # days: 3-7
         # max. num. of turbines can be visited at one period
-        self.eta = 5#data['eta']
+        self.eta = data['eta']
         # indicate whether the base serves the wind farm
-        # self.lambda_bf = data['lambda']
+        self.lambda_bf = data['lambda']
         # technician cost (/day) corresponding to technician type
         self.tech_cost = data['technician']
         # num of wind farms
@@ -20,7 +19,7 @@ class MasterProblem():
         # num. of available technician at bases
         self.B_tech = data['base']['technician']
         # indicate available vessels at bases
-        # self.B_vessel = data['base']['vessel']
+        self.B_vessel = data['base']['vessel']
         # coordinate of turbines in wind farms
         self.WF_coordinate = data['wind_farm']['coordinate']
         # maintenance time (/hour) of corresponding turbines
@@ -50,23 +49,20 @@ class MasterProblem():
         # transfer time for technicians and equipment from vessel to turbine
         self.V_transTime = data['vessel']['trans_time']
         # available working hours based on the weather and vessels type (/hour)
-        self.time_window = data['vessel']['time_window']
+        self.time_window = data['time_window']
         # indicate whether vessel available at the period
-        # self.V_available = data['vessel']['availability']
-        self.task = data['wind_farm']['task']
+        self.V_available = data['vessel']['availability']
         # num of wind farms
         self.num_WF = len(self.WF_tech)
         # num of bases
         self.num_B = len(self.B_tech)
         # num of vessels
         self.num_V = len(self.time_window)
-        self.task_coordinate = [[self.WF_coordinate[i][j] for j in self.task[i]] for i in range(self.num_WF)]
         # types of available technicians
         self.types = list(range(len(self.tech_cost)))
         # possible subtours with max length eta
         self.subtours = self.findsubsets()
-
-        
+   
     # to calculate distance including a base
     def createDistanceMatrix(self, coordinate, base):
         Num = len(coordinate) + 1
@@ -74,10 +70,10 @@ class MasterProblem():
         for i in range(Num-1):
             p1 = np.array([coordinate[i][0], coordinate[i][1]])
             p3 = np.array([base[0], base[1]])
-            d[0, i+1] = d[i+1, 0] = np.linalg.norm(p1/1000 - p3/1000)
+            d[0, i+1] = d[i+1, 0] = np.linalg.norm(p1 - p3)
             for j in range(i + 1, Num-1):
                 p2 = np.array([coordinate[j][0], coordinate[j][1]])
-                d[i+1, j+1] = d[j+1, i+1] = np.linalg.norm(p1/1000 - p2/1000)
+                d[i+1, j+1] = d[j+1, i+1] = np.linalg.norm(p1 - p2)
         # d = np.round(d, 2)
         return d  # type: np.array
 
@@ -86,11 +82,10 @@ class MasterProblem():
         subset = [[] for i in range(self.num_WF)]
         for wf in range(self.num_WF):
             for i in range(2, self.eta + 1):
-                S = list(range(len(self.task_coordinate[wf])))
+                S = list(range(len(self.WF_coordinate[wf])))
                 sub = list(combinations(S, i))
                 sub = [list(k) for k in sub]
                 subset[wf].extend(sorted(sub))
-        # print ('subset: ', subset)
         return subset
 
     def Mater_Problem(self):
@@ -104,7 +99,6 @@ class MasterProblem():
                 for b in range(self.num_B):
                     for wf in range(self.num_WF):
                         if R_turbine[v][t][b][wf] == []:
-                            # print (['(v,t,b,wf)[%d,%d,%d,%d]' % (v,t,b,wf)])
                             continue
                         for r in range(np.size(R_turbine[v][t][b][wf][0],1)):
                             A.append((v,t,b,wf,r))
@@ -166,18 +160,6 @@ class MasterProblem():
         _routes = [[] for i in range(self.num_V)]
         if model.status == GRB.OPTIMAL:
             cost_opt = model.objVal
-            # print('Master Problem: OPTIMAL\n', 'total cost: ', round(cost_opt, 2))
-            # for v in range(self.num_V):
-            #     for t in range(self.period):
-            #         nums = 0
-            #         for b in range(self.num_B):
-            #             for wf in range(self.num_WF):
-            #                 if R_turbine[v][t][b][wf] == []:
-            #                         continue
-            #                 for r in range(np.size(R_turbine[v][t][b][wf][0],1)):
-            #                     if x[v,t,b,wf,r].x == 1:
-            #                         nums += 1
-            #         # print ('(v,t)[%d,%d]' % (v,t), 'nums: ', nums)
 
             for b in range(self.num_B):
                 for wf in range(self.num_WF):
@@ -193,10 +175,9 @@ class MasterProblem():
                                 continue
                             for r in range(np.size(R_turbine[v][t][b][wf][0],1)):
                                 if x[v,t,b,wf,r].x == 1:
-                                    print ('(b,wf,v,t)[%d,%d,%d,%d]' % (b,wf,v,t),\
-                                        'routes: ', routes[v][t][b][wf][r])
-                                    _routes[v].append(routes[v][t][b][wf][r])                           
-            print ('_routes: \n', _routes)
+#                                     print ('(b,wf,v,t)[%d,%d,%d,%d]' % (b,wf,v,t),\
+#                                         'routes: ', routes[v][t][b][wf][r])
+                                    _routes[v].append(routes[v][t][b][wf][r])
             return [cost_opt, _routes]
         else: 
             print('Master Problem: Infeasible')
@@ -205,36 +186,29 @@ class MasterProblem():
     def Generating_Feasible_Routes(self):
         np.set_printoptions(suppress=True)
         # store all feasible sets of turbines including cost at corresponding period
-        Routes_turbine = [[[[[] for i in range(self.num_WF)] for j in range(self.num_B)] \
-            for k in range(self.period)] for m in range(self.num_V)]
+        Routes_turbine = [[[[[] for i in range(self.num_WF)] for j in range(self.num_B)] for k in range(self.period)] for m in range(self.num_V)]
         # store all feasible route at corresponding period
-        Routes = [[[[[] for i in range(self.num_WF)] for j in range(self.num_B)] \
-            for k in range(self.period)] for m in range(self.num_V)]
+        Routes = [[[[[] for i in range(self.num_WF)] for j in range(self.num_B)] for k in range(self.period)] for m in range(self.num_V)]
         # store corresponding num of technicians required by the route
-        NumTechs = [[[[[] for i in range(self.num_WF)] for j in range(self.num_B)] \
-            for k in range(self.period)] for m in range(self.num_V)]
-        visited = [[[[[] for i in range(self.num_WF)] for j in range(self.num_B)] \
-            for k in range(self.period)] for m in range(self.num_V)]
+        NumTechs = [[[[[] for i in range(self.num_WF)] for j in range(self.num_B)] for k in range(self.period)] for m in range(self.num_V)]
+        visited = [[[[[] for i in range(self.num_WF)] for j in range(self.num_B)] for k in range(self.period)] for m in range(self.num_V)]
 
         for vessel in range(self.num_V):
             for base in range(self.num_B):
-                # if self.B_vessel[base][vessel] == 0:
-                #     continue
-                # visited = {} # store routes
-                # visited_feasible = {} # indicate whether routes feasible or not  
+                if self.B_vessel[base][vessel] == 0:
+                    continue
                 for farm in range(self.num_WF):
                     # if self.lambda_bf[base][farm] == 0:
                     #     continue
                     # calculate the distance
-                    dist = self.createDistanceMatrix(self.task_coordinate[farm], \
-                        self.B_coordinate[base])
+                    dist = self.createDistanceMatrix(self.WF_coordinate[farm], self.B_coordinate[base])
                     # travel time between turbines
                     travelTime = dist/self.V_speed[vessel]
-                    numTurbine = len(self.task_coordinate[farm])
+                    numTurbine = len(self.WF_coordinate[farm])
                     for t in range(self.period):
                         # feasibility condition
-                        # if self.V_available[vessel][t] == 0: 
-                        #     continue
+                        if self.V_available[vessel][t] == 0: 
+                            continue
                         ''' 
                         rows: turbines + cost, columns: feasible routes,
                         R_turbine[i,p] = 1 if route p visits i
@@ -244,8 +218,7 @@ class MasterProblem():
                         R_turbine = np.zeros((numTurbine + 4, 1))
                         for turbine in range(numTurbine):
                             # feasibility conditions
-                            # if self.V_toTurbine[vessel][farm][turbine] == 0 \
-                            #     or self.WF_availParts[farm][turbine][t] == 0: 
+                            if self.V_toTurbine[vessel][farm][turbine] == 0 or self.WF_availParts[farm][turbine][t] == 0: 
                             #     continue
                             # total travel time
                             _travle_time = 2*travelTime[0,turbine]+self.WF_mainTime[farm][turbine] + self.V_transTime[vessel]
@@ -257,11 +230,9 @@ class MasterProblem():
                             # travel cost
                             newRoute[-4] = 2*(self.V_cost[vessel]*travelTime[0,turbine])
                             # personnel cost
-                            newRoute[-3] = round(sum(self.WF_tech[farm][turbine][p] * \
-                                self.tech_cost[p] for p in self.types),2)
+                            newRoute[-3] = round(sum(self.WF_tech[farm][turbine][p] * self.tech_cost[p] for p in self.types),2)
                             # penalty cost
-                            newRoute[-2] = max(0, t - self.WF_deadline[farm][turbine]\
-                                * self.WF_penCost[farm][turbine])
+                            newRoute[-2] = max(0, t - self.WF_deadline[farm][turbine] * self.WF_penCost[farm][turbine])
                             # total cost
                             newRoute[-1] = sum(newRoute[-4:-1,0])
                             newRoute[:-4,0] = np.round(newRoute[:-4,0])
@@ -300,8 +271,7 @@ class MasterProblem():
                         Routes_turbine[vessel][t][base][farm].append(R_turbine[:,1:])
         return [Routes_turbine, Routes, NumTechs]
 
-    def Solving_MILP(self, turbines, dist, travelTime, vessel, t, base, farm, \
-        R, routes, Techs, visited):
+    def Solving_MILP(self, turbines, dist, travelTime, vessel, t, base, farm, R, routes, Techs, visited):
 
         for t_1 in range(1, t):
             for b_1 in range(self.num_B):
@@ -439,7 +409,6 @@ class MasterProblem():
                         c_t += self.V_cost[vessel] * travelTime[i1,j1] * y[i,j].x
 
             path = [] # store the optimal route without base
-            # path = [0]
             TT = [0]
             rr = 0
             ii = 0
@@ -449,17 +418,13 @@ class MasterProblem():
                         ii = k
                         path.append(k-1 if k <= n else k-n-1)
                         TT.append(round(T[k].x, 2))
-                        # path.append(k)
                         break
                 rr += 1
             TT.append(T[nodes[-1]].x)
             [c_t, c_q, c_lr, c_total] = [round(i,2) for i in [c_t, c_q, c_lr, c_total]]
             num_techs = [Q[p,0].x for p in self.types]
-            # print('nodes: ', nodes)
-            print('path: ', ['vessel[%d]' % vessel] + ['period[%d]' % t] + \
-                 ['wf[%d]' % farm] + ['b[%d]' % base] + path)
-            # print ('T: ', TT)
-            # print ('###############\n \n')
+#             print('path: ', ['vessel[%d]' % vessel] + ['period[%d]' % t] + \
+#                  ['wf[%d]' % farm] + ['b[%d]' % base] + path)
             return [[c_t, c_q, c_lr, c_total], path, num_techs]
         else:
             print('infeasible')
