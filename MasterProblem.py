@@ -38,11 +38,11 @@ class MasterProblem():
         # penalty cost if turbines not repaired before deadline
         self.WF_penCost = data['wind_farm']['penalty_cost']
         # indicate whether spare parts for the turbine are available at the period
-        # self.WF_availParts = data['wind_farm']['avail_parts']
+        self.WF_availParts = data['wind_farm']['avail_parts']
         # spare parts capacity (/tonne) of vessel
         self.V_parts = data['vessel']['capacity']
         # indicate whether vessel is able to transfer spare parts needed by the turbine
-        # self.V_toTurbine = data['vessel']['to_turbine']
+        self.V_toTurbine = data['vessel']['to_turbine']
         # max num. of technician on board
         self.V_tech = data['vessel']['technician']
         # fuel cost (/hour) of vessels
