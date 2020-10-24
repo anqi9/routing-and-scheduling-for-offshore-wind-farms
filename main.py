@@ -4,9 +4,10 @@ from GB import GB
 
 def main():
     data = create_data_model()
-    opt_GB = GB2(data)
+    # to create an optimization model
+    opt_GB = GB(data)
+    # to solve the model using Gurobi solver
     opt_GB.Solver()
-
 
 if __name__ == "__main__":
     main()
