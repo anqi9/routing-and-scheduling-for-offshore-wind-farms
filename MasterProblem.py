@@ -5,6 +5,9 @@ from gurobipy import Model, GRB, quicksum
 import copy
 from itertools import combinations
 
+''''
+this class is to solve routing&scheduling using Dantzig-Wolf decomposition
+'''
 class MasterProblem():
     def __init__(self, data):
         self.period = data['period']  # days: 3-7
