@@ -1,6 +1,4 @@
 # -*- coding: utf-8 -*-
-import time
-from GB import GB
 
 def create_data_model():
     """Stores the data for the problem."""
@@ -82,12 +80,3 @@ def create_data_model():
         [[51, 32], [50, 35], [52, 35], [50, 34], [48, 35], [52, 38], [45, 37], [49, 34]]
     ]
     return data
-
-def main():
-    data = create_data_model()
-    opt_GB = GB2(data)
-    opt_GB.Solver()
-
-
-if __name__ == "__main__":
-    main()
