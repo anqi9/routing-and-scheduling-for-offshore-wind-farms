@@ -222,7 +222,7 @@ class MasterProblem():
                         for turbine in range(numTurbine):
                             # feasibility conditions
                             if self.V_toTurbine[vessel][farm][turbine] == 0 or self.WF_availParts[farm][turbine][t] == 0: 
-                            #     continue
+                                 continue
                             # total travel time
                             _travle_time = 2*travelTime[0,turbine]+self.WF_mainTime[farm][turbine] + self.V_transTime[vessel]
                             if _travle_time >= self.time_window[vessel][t][farm]:
