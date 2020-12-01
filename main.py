@@ -74,7 +74,7 @@ def create_data_model():
     # knots to km/h
     data['vessel']['speed'] = [i * 1.852 for i in data['vessel']['speed']]
     data['vessel']['trans_time'] = [0.25, 0.25, 0.25, 0.25, 0.25]
-    data['vessel']['availability'] = [[1, 1, 1], [1, 1, 1], [1, 1, 1], [1, 1, 1]]
+    data['vessel']['availability'] = [[1, 1, 1], [1, 1, 1], [1, 1, 1], [1, 1, 1], [1, 1, 1]]
     # random generated coordinates
     data['base']['coordinate'] = [[20, 30], [60, 63]]
     data['wind_farm']['coordinate'] = [
