@@ -52,7 +52,7 @@ class MasterProblem():
         # transfer time for technicians and equipment from vessel to turbine
         self.V_transTime = data['vessel']['trans_time']
         # available working hours based on the weather and vessels type (/hour)
-        self.time_window = data['time_window']
+        self.time_window = data['vessel']['time_window']
         # indicate whether vessel available at the period
         self.V_available = data['vessel']['availability']
         # num of wind farms
