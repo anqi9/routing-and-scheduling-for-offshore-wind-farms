@@ -184,7 +184,7 @@ class MasterProblem():
             return [cost_opt, _routes]
         else: 
             print('Master Problem: Infeasible')
-            return [None, None, None]
+            return [None, None]
 
     def Generating_Feasible_Routes(self):
         np.set_printoptions(suppress=True)
